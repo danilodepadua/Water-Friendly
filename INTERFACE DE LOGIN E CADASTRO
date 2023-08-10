@@ -1,0 +1,236 @@
+from tkinter import messagebox
+import customtkinter
+from tkinter import *
+import sqlite3 as lite
+from customtkinter import * 
+
+customtkinter.set_appearance_mode("dark")
+customtkinter.set_default_color_theme("dark-blue")
+
+# definindo cores
+laranja = '#de4300'
+azul = '#02179c'
+amarelo = '#948501'
+vermelho = '#c20404'
+verde = '#0e6601'
+
+# Tela de verificar :
+def verificar_senha():
+    usuario = entry_usuario.get()  # Obter o valor do campo de usuário
+    senha = entry_senha.get()  # Obter o valor do campo de senha
+
+    if usuario == 'admin' and senha == 'admin':
+        messagebox.showinfo('Login', 'Seja bem vindo')
+        frame_right.pack_forget()
+        janela.mainloop()
+    else:
+        messagebox.showwarning('Login', 'Usuário ou senha incorretos')
+        
+# tela de cadastro
+def pagina_cadastro():
+
+    frame_right.pack_forget()
+
+    # criando a tela nova :
+    frame_cadastro_inteiro = customtkinter.CTkFrame(
+        master=janela, width=700, height=396)
+    frame_cadastro_inteiro.pack()
+
+    # editando o frame
+    label_cadastro = customtkinter.CTkLabel(master=frame_cadastro_inteiro, text='CADASTRO :',
+                                            font=('Josefin Sans bold', 30), text_color=laranja)
+    label_cadastro.place(x=25, y=5)
+
+    # editando o entry de usuario
+    entry_usuario = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Usuário')
+    entry_usuario.place(x=25, y=90)
+
+    # editando o entry do nome
+    entry_nome = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Nome')
+    entry_nome.place(x=25, y=160)
+
+    # editando o entry do sobrenome
+    entry_sobrenome = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Sobrenome')
+    entry_sobrenome.place(x=25, y=230)
+
+    # editando o entry da idade
+    entry_idade = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Idade')
+    entry_idade.place(x=25, y=300)
+
+    # editando o entry do Email
+    entry_email = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Email')
+    entry_email.place(x=350, y=90)
+
+    # editando o entry da cidade
+    entry_cidade = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Cidade')
+    entry_cidade.place(x=350, y=160)
+
+    # sigla do Pais
+    entry_pais = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Sigla do País')
+    entry_pais.place(x=350, y=230)
+
+    # editando o entry da senha
+    entry_senha = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Senha', show='*')
+    entry_senha.place(x=350, y=300)
+
+    
+    # botao de voltar para o login
+    def voltar_login():
+        frame_cadastro_inteiro.pack_forget()
+        frame_right.pack(side=RIGHT)
+
+    botao_voltar = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='VOLTAR', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=azul, command=voltar_login)
+    botao_voltar.place(x=170, y=350)
+
+    # botao de cadastrar
+    botao_cadastrar = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='CADASTRAR', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=laranja)
+    botao_cadastrar.place(x=350, y=350)
+
+# Tela das areas :
+def tela_das_areas():
+    # removendo as informaçoes do frame anterior
+    frame_right.pack_forget()
+
+    # criando a tela nova :
+    frame_cadastro_inteiro = customtkinter.CTkFrame(
+        master=janela, width=700, height=396)
+    frame_cadastro_inteiro.pack()
+
+    # editando o frame
+    label_areas = customtkinter.CTkLabel(master=frame_cadastro_inteiro, text='GERENCIAMENTO :',
+                                         font=('Josefin Sans bold', 25), text_color=laranja).place(x=25, y=5)
+
+    label_areas = customtkinter.CTkLabel(master=frame_cadastro_inteiro, text='GERENCIAMENTO :',
+                                         font=('Josefin Sans bold', 25), text_color=laranja).place(x=25, y=5)
+
+    # botao de tomate
+    botao_tomate = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='TOMATE', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=laranja).place(x=100, y=100)
+
+    # botao de alface
+    botao_alface = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='ALFACE', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=laranja).place(x=280, y=100)
+
+    # botao de cenoura
+    botao_cenoura = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='CENOURA', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=laranja).place(x=460, y=100)
+
+    # botao de batata
+    botao_batata = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='BATATA', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=laranja).place(x=100, y=180)
+    
+    #botao de melancia
+    botao_melancia = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='MELANCIA', width=150, font=('Josefin Sans bold', 14), fg_color=laranja).place(x=280, y=180)
+
+    #botao de cebola
+    botao_cebola = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='CEBOLA', width=150, font=('Josefin Sans bold', 14), fg_color=laranja).place(x=460, y=180)
+    
+    #Configurando o crud 
+    botao_adicionar= customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='ADICIONAR', width=150, font=('Josefin Sans bold', 14), fg_color=azul).place(x=100, y=290)
+
+    botao_remover= customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='REMOVER', width=150, font=('Josefin Sans bold', 14), fg_color=vermelho).place(x=280, y=290)
+
+    botao_criar= customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='ATUALIZAR', width=150, font=('Josefin Sans bold', 14), fg_color=verde).place(x=460, y=290)
+
+    #botao pra sair
+    def sair():
+        frame_cadastro_inteiro.pack_forget()
+        frame_right.pack(side=RIGHT)
+    botao_sair= customtkinter.CTkButton(master=frame_cadastro_inteiro,command=sair ,height=0, text='SAIR', width=150, font=('Josefin Sans bold', 14), fg_color=amarelo).place(x=280, y=350)
+
+# tela de cadastrar area :
+def tela_cadastrar_area():
+    frame_right.pack_forget()
+
+    # criando a tela nova :
+    frame_cadastro_inteiro = customtkinter.CTkFrame(
+        master=janela, width=700, height=396)
+    frame_cadastro_inteiro.pack()
+
+    
+    # Editando o entry da area do tomate
+    entry_tomate = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Digite a área do tomate').place(x=25, y=90)
+
+    # Editando o entry da area do alface
+    entry_alface = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Digite a área do alface').place(x=350, y=90)
+
+    # Editando o entry da area da cenoura
+    entry_cenoura = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Digite a área da cenoura').place(x=25, y=160)
+
+    # Editando o entry da area da batata
+    entry_batata = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Digite a área da batata').place(x=350, y=160)
+
+    # Editando o entry da area da melancia
+    entry_melancia = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Digite a área da melancia').place(x=25, y=230)
+
+    # Editando o entry da area da cebola
+    entry_cebola = customtkinter.CTkEntry(
+        master=frame_cadastro_inteiro, width=300, placeholder_text='Digite a área da cebola').place(x=350, y=230)
+
+    # Botao de cadastro
+    botao_cadastrar = customtkinter.CTkButton(master=frame_cadastro_inteiro, height=0, text='CADASTRAR', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=laranja).place(x=260, y=300)
+
+# criando a janela
+janela = customtkinter.CTk()
+janela.title("Water friendly")
+janela.geometry("700x400")
+janela.resizable(width=False, height=False)
+
+# dividindo a janela com frames:
+frame_right = customtkinter.CTkFrame(master=janela, width=350, height=396)
+frame_right.pack(side=RIGHT)
+
+# editando o frame
+label_login = customtkinter.CTkLabel(master=frame_right, text='LOGIN :', font=(
+    'Josefin Sans bold', 25), text_color=laranja)
+label_login.place(x=25, y=5)
+
+# editando o entry de login
+entry_usuario = customtkinter.CTkEntry(master=frame_right, width=300,
+                                     font=('Josefin Sans bold', 14), placeholder_text='Nome de usuário')
+entry_usuario.place(x=25, y=105)
+
+# editando o entry da senha
+entry_senha = customtkinter.CTkEntry(master=frame_right, width=300,
+                                     font=('Josefin Sans bold', 14), placeholder_text='Senha', show='*')
+entry_senha.place(x=25, y=175)
+
+# checkbutton
+check_box = customtkinter.CTkCheckBox(
+    master=frame_right, text='Mostrar senha').place(x=25, y=235)
+
+# botão de login
+botao_login = customtkinter.CTkButton(
+    master=frame_right, text='ENTRAR', width=300, font=('Josefin Sans bold', 14), fg_color=laranja, command=verificar_senha)
+botao_login.place(x=25, y=285)
+
+# label de cadastro
+label_cadastro = customtkinter.CTkLabel(master=janela, text='Não tem uma conta?', font=(
+    'Josefin Sans bold', 25), text_color=laranja)
+label_cadastro.place(x=35, y=95)
+label_cadastro2 = customtkinter.CTkLabel(
+    master=janela, text='Cadastre-se agora', font=('Josefin Sans bold', 20))
+label_cadastro2.place(x=70, y=135)
+
+# botão de cadastro
+botao_cadastro = customtkinter.CTkButton(master=janela, text='CADASTRAR', command=pagina_cadastro, width=200, font=(
+    'Josefin Sans bold', 15), fg_color=laranja)
+botao_cadastro.place(x=60, y=190)
+
+janela.mainloop()
