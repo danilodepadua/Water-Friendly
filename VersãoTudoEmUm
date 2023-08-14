@@ -1,0 +1,555 @@
+from tkinter import messagebox
+import sqlite3 as lite
+from customtkinter import *
+from tkinter import *
+from functools import partial
+
+Plantacoes_Usuario = []
+UsuarioLogado = 'Lexdian'
+ListaBotoes = []
+
+def IniciarBanco():
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS Usuarios (Login TEXT PRIMARY KEY, Nome TEXT, Sobrenome TEXT, Senha TEXT, Local TEXT, Email TEXT, Idade INTEGER)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS Plantacoes (Id Integer PRIMARY KEY, User TEXT, Planta Text, Tamanho INTEGER, FOREIGN KEY(User) REFERENCES Usuarios(Login))")
+    con.close()
+def AdicionarUsuario(login, nome, sobrenome, senha, local, email, idade):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    try:
+        cursor.execute("INSERT INTO Usuarios VALUES(?,?,?,?,?,?,?)", (login, nome, sobrenome, senha, local, email, idade))
+        con.commit()
+        messagebox.showinfo('Cadastro', 'Cadastro realizado com sucesso!')
+    except:
+        messagebox.showerror('Cadastro', 'O apelido já está em uso. Escolha outro apelido.')
+    con.close()
+def AdicionarPlantacao(user, planta, tamanho):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try:
+        cursor.execute(f"INSERT INTO Plantacoes(User, Planta, Tamanho) VALUES('{user}', '{planta}', '{tamanho}')")
+        con.commit()
+    except:
+        print("Erro ao adicionar plantacao")
+    con.close()
+def DeletarUsuario(Login):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"DELETE FROM Plantacoes WHERE User = '{Login}'")
+        cursor.execute(f"DELETE FROM Usuarios WHERE Login = '{Login}'")
+        con.commit()
+    except:
+        print("Erro ao deletar usuario")
+    con.close()
+def DeletarPlantacao(id):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"DELETE FROM Plantacoes WHERE Id = '{id}'")
+        con.commit()
+    except:
+        print("Erro ao deletar plantacao")
+    con.close()
+def AtualizarPlantacao(id, planta, tamanho):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"UPDATE Plantacoes SET Planta = '{planta}', Tamanho = '{tamanho}' WHERE Id = '{id}'")
+        con.commit()
+    except:
+        print("Erro ao atualizar plantacao")
+    con.close()
+def ListarPlantacoes(User):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"SELECT * FROM Plantacoes WHERE User = '{User}'")
+        global Plantacoes_Usuario
+        Plantacoes_Usuario = cursor.fetchall()
+    except:
+        print("Erro ao listar plantacoes")
+    con.close()
+def VerificarUsuario(Login, Senha):
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+    try:
+        cursor.execute(f"SELECT * FROM Usuarios WHERE Login = '{Login}' AND Senha = '{Senha}'")
+        global UsuarioLogado
+        UsuarioLogado = Login
+        if cursor.fetchone() == None:
+            return False
+        else:
+            InfoUsuario()
+            return True
+    except:
+        print("Erro ao verificar usuario")
+    con.close()
+def InfoUsuario():
+    con = lite.connect('banco.db')
+    cursor = con.cursor()
+
+    consulta = "SELECT * FROM Usuarios WHERE Login = ?"
+    cursor.execute(consulta, (UsuarioLogado,))
+    resultado = cursor.fetchone()
+    if resultado:
+        # Preencher os labels com os dados do usuário
+        l_apelido_valor = CTkLabel(frame_perfil, text=resultado[0], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_apelido_valor.place(x=120, y=115)
+
+        l_senha_valor = CTkLabel(frame_perfil, text=resultado[3], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_senha_valor.place(x=420, y=115)
+
+        l_nome_valor = CTkLabel(frame_perfil, text=resultado[1], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_nome_valor.place(x=110, y=160)
+
+        l_sobrenome_valor = CTkLabel(frame_perfil, text=resultado[2], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_sobrenome_valor.place(x=470, y=165)
+
+        l_idade_valor = CTkLabel(frame_perfil, text=resultado[6], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_idade_valor.place(x=110, y=215)
+
+        l_email_valor = CTkLabel(frame_perfil, text=resultado[5], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_email_valor.place(x=415, y=215)
+
+        l_cidade_valor = CTkLabel(frame_perfil, text=resultado[4], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_cidade_valor.place(x=110, y=265)
+
+        l_pais_valor = CTkLabel(frame_perfil, text=resultado[4], font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_pais_valor.place(x=410, y=265)
+    con.close()
+
+IniciarBanco()
+
+set_appearance_mode("dark")
+set_default_color_theme("dark-blue")
+
+# definindo cores
+laranja = '#de4300'
+azul = '#02179c'
+amarelo = '#948501'
+vermelho = '#c20404'
+verde = '#00e099'
+preto = '#151716'
+branco = '#c9c9c9'
+
+window = CTk()
+window.title("Testando")
+window.geometry("700x400")
+window.resizable(False, False)
+
+def Apagar():
+    for widget in window.winfo_children():
+        widget.pack_forget()
+def mostrar_senha():
+    if check_box.get() == 1:
+        entry_senha.configure(show='')
+    else:
+        entry_senha.configure(show='*')
+def adicionar_area():
+    Apagar()
+    frame_adicionar_area.pack(side=RIGHT, fill = BOTH, expand = True, padx = 10, pady = 10)
+def pagina_cadastro():
+    Apagar()
+    frameCadastro.pack(side=RIGHT, fill = BOTH, expand = True, padx = 10, pady = 10)
+def tela_gerenciamento():
+    Apagar()
+    frame_gerenciamento_inteiro.pack(side=RIGHT, fill = BOTH, expand = True, padx = 10, pady = 10)
+def tela_perfil():
+    Apagar()
+    frame_perfil.pack(side=RIGHT, fill = BOTH, expand = True, padx = 10, pady = 10)
+def tela_minhaplantacao():
+    Apagar()
+    for i in ListaBotoes:
+        i.destroy()
+    ListaBotoes.clear()
+    ListarPlantacoes(UsuarioLogado)
+    coluna = 0
+    linha = 3
+
+    for i in range(len(Plantacoes_Usuario)):
+        botao_planta = CTkButton(frame_scroll,command=acessar_planta ,text=Plantacoes_Usuario[i][2], width=150, font=(
+            'Josefin Sans bold', 14), fg_color='#737373')
+        botao_planta.grid(row=linha, column=coluna, padx=10, pady=5)
+        ListaBotoes.append(botao_planta)
+        coluna += 1
+        if coluna > 2:
+            coluna = 0
+            linha += 1
+    frame_scroll.pack(side=RIGHT, fill = BOTH, expand = True, padx = 10, pady = 10)
+
+
+
+#Tela Login
+frame_right = CTkFrame(window, width=350, height=396)
+frame_right.pack(side=RIGHT)
+frame_left = CTkFrame(
+    window, width=350, height=396, fg_color='#151716')
+frame_left.pack(side=LEFT)
+# editando o frame
+label_login = CTkLabel(frame_right, text='LOGIN :', font=(
+    'Josefin Sans bold', 25), text_color=laranja)
+label_login.place(x=25, y=5)
+# editando o entry de login
+entry_usuario = CTkEntry(frame_right, width=300,
+                                       font=('Josefin Sans bold', 14), placeholder_text='Nome de usuário')
+entry_usuario.place(x=25, y=105)
+# editando o entry da senha
+entry_senha = CTkEntry(frame_right, width=300,
+                                     font=('Josefin Sans bold', 14), placeholder_text='Senha', show='*')
+entry_senha.place(x=25, y=175)
+# checkbutton
+check_box = CTkCheckBox(frame_right, text='Mostrar senha', onvalue=1, offvalue=0, command=mostrar_senha)
+check_box.place(x=25, y=245)
+# botão de login
+def fazer_login():
+    if VerificarUsuario(entry_usuario.get(), entry_senha.get()):
+        messagebox.showinfo('Longin', 'Seja bem vindo!')
+        tela_gerenciamento()
+    else:
+        messagebox.showinfo('Longin', 'Erro oa logar!')
+
+botao_login = CTkButton(
+    frame_right, text='ENTRAR', width=300, font=('Josefin Sans bold', 14), fg_color=laranja, command=fazer_login)
+botao_login.place(x=25, y=285)
+# label de cadastro
+label_cadastro = CTkLabel(window, text='Não tem uma conta?', font=(
+    'Josefin Sans bold', 25), text_color=laranja, bg_color='#151716')
+label_cadastro.place(x=35, y=95)
+label_cadastro2 = CTkLabel(
+    window, text='Cadastre-se agora', bg_color='#151716', font=('Josefin Sans bold', 20))
+label_cadastro2.place(x=70, y=135)
+# botão de cadastro
+botao_cadastro = CTkButton(window, text='CADASTRAR', command=pagina_cadastro, width=200, font=(
+    'Josefin Sans bold', 15), fg_color=laranja)
+botao_cadastro.place(x=60, y=190)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Tela Cadastro
+frameCadastro = CTkFrame(window, width=350, height=396)
+label_cadastro = CTkLabel(frameCadastro, text='CADASTRO :', font=('Josefin Sans bold', 30), text_color=laranja)
+label_cadastro.place(x=25, y=5)
+
+# editando o entry de usuario
+entry_usuario_Login = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Usuário')
+entry_usuario_Login.place(x=25, y=90)
+
+# editando o entry do nome
+entry_nome = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Nome')
+entry_nome.place(x=25, y=160)
+
+# editando o entry do sobrenome
+entry_sobrenome = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Sobrenome')
+entry_sobrenome.place(x=25, y=230)
+
+# editando o entry da idade
+entry_idade = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Idade')
+entry_idade.place(x=25, y=300)
+
+# editando o entry do Email
+entry_email = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Email')
+entry_email.place(x=350, y=90)
+
+# editando o entry da cidade
+entry_cidade = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Cidade')
+entry_cidade.place(x=350, y=160)
+
+# sigla do Pais
+entry_pais = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Sigla do País')
+entry_pais.place(x=350, y=230)
+
+# editando o entry da senha
+entry_senha_Usuario = CTkEntry(
+    frameCadastro, width=300, placeholder_text='Senha', show='*')
+entry_senha_Usuario.place(x=350, y=300)
+
+def voltar_login():
+    Apagar()
+    frame_right.pack(side = RIGHT)
+    frame_left.pack(side = LEFT)
+botaovoltar = CTkButton(frameCadastro, height=0, text='VOLTAR', width=150, font=(
+        'Josefin Sans bold', 14), fg_color=amarelo, command=voltar_login)
+botaovoltar.place(x=150, y=350)
+botaovoltar.configure(corner_radius=10)
+
+def cadastrarUsuario():
+    if entry_usuario_Login.get() == '' or entry_nome.get() == '' or entry_sobrenome.get() == '' or entry_senha_Usuario.get() == '' or entry_cidade.get() == '' or entry_email.get() == '' or entry_idade.get() == '':
+        messagebox.showerror('Cadastro', 'Preencha todos os campos!')
+    else:
+        AdicionarUsuario(entry_usuario_Login.get(), entry_nome.get(), entry_sobrenome.get(), entry_senha_Usuario.get(), entry_cidade.get(), entry_email.get(), entry_idade.get())
+
+botao_cadastrar = CTkButton(frameCadastro, height=0, text='CADASTRAR', width=150,font=('Josefin Sans bold', 14), fg_color=laranja, command=cadastrarUsuario)
+botao_cadastrar.place(x=350, y=350)
+botao_cadastrar.configure(corner_radius=10)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Tela Gerenciamento
+
+frame_gerenciamento_inteiro = CTkFrame(window, width=700, height=706)
+
+# editando o frame
+label_gerenciamento = CTkLabel(
+    frame_gerenciamento_inteiro, text='GERENCIAMENTO :', font=('Josefin Sans bold', 30), text_color=laranja)
+label_gerenciamento.place(x=25, y=5)
+botao_perfil = CTkButton(frame_gerenciamento_inteiro, command=tela_perfil, text='PERFIL', width=150, font=(
+    'Josefin Sans bold', 14), fg_color=laranja)
+botao_perfil.place(x=150, y=120)
+botao_perfil.configure(corner_radius=10)
+botao_minhaplantacao = CTkButton(
+    frame_gerenciamento_inteiro, command=tela_minhaplantacao, text='MINHA PLANTAÇÃO', width=150, font=('Josefin Sans bold', 14), fg_color=laranja)
+botao_minhaplantacao.place(x=350, y=120)
+botao_minhaplantacao.configure(corner_radius=10)
+
+# botao de logout
+def logout():
+    window.destroy()
+
+botao_logout = CTkButton(frame_gerenciamento_inteiro, command=logout, text='SAIR', width=150, font=(
+    'Josefin Sans bold', 14), fg_color=vermelho)
+botao_logout.place(x=250, y=250)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Tela MinhasPlantacoes
+
+frame_scroll = CTkScrollableFrame(window)
+
+# botao de voltar
+
+def botao_voltar():
+    tela_gerenciamento()
+
+#acessando o botão de cada planta
+def acessar_planta():
+    frame_scroll.pack_forget()
+    frame_planta = CTkFrame(window, width=700, height=396)
+    frame_planta.pack()
+
+
+# Configuração do espaçamento entre os botões das plantas
+espacamento_vertical = 100
+espacamento_horizontal = 100
+
+# Configuração da linha que contém os botões das plantas
+frame_scroll.rowconfigure(2, minsize=espacamento_vertical)
+
+# Configuração das colunas para os botões das plantas
+for i in range(3):  # Número de colunas para os botões das plantas
+    frame_scroll.columnconfigure(i, minsize=espacamento_horizontal)
+
+# editando o frame
+label_minhaplantacao = CTkLabel(
+    frame_scroll, text='MINHA PLANTAÇÃO :', font=('Josefin Sans bold', 30), text_color=laranja)
+label_minhaplantacao.grid(
+    row=0, column=0, columnspan=3, padx=25, pady=5, sticky='w')
+
+botao_remover = CTkButton(frame_scroll, text='REMOVER', width=150, font=(
+    'Josefin Sans bold', 14), fg_color=vermelho)
+botao_remover.grid(row=2, column=0, padx=10, pady=5)
+
+botao_adicionar_crud = CTkButton(frame_scroll, command=adicionar_area, text='ADICIONAR', width=150, font=(
+    'Josefin Sans bold', 14), fg_color=verde, text_color='black')
+botao_adicionar_crud.grid(row=2, column=1, padx=10, pady=5)
+
+botao_update = CTkButton(
+    frame_scroll, text='UPDATE', width=150, font=('Josefin Sans bold', 14), fg_color=azul)
+botao_update.grid(row=2, column=2, padx=10, pady=5)
+
+botao_voltar_2 = CTkButton(frame_scroll, command=botao_voltar, text='VOLTAR', width=150, font=(
+    'Josefin Sans bold', 14), fg_color=amarelo)
+botao_voltar_2.grid(row=2, column=3, padx=10, pady=5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Tela adicionar area
+
+# criando a tela nova :
+frame_adicionar_area = CTkFrame(window)
+
+# editando o frame
+label_adicionar_area = CTkLabel(
+    frame_adicionar_area, text='ADICIONAR ÁREA :', font=('Josefin Sans bold', 30), text_color=laranja)
+label_adicionar_area.place(x=25, y=5)
+
+# editando o entry de usuario
+entry_area = CTkEntry(
+    frame_adicionar_area, width=300, placeholder_text='Tamanho da área da planta em hectares')
+entry_area.place(x=25, y=90)
+
+entry_cultura = CTkEntry(
+    frame_adicionar_area, width=300, placeholder_text='Tipo de planta')
+entry_cultura.place(x=350, y=90)
+
+# botao de voltar
+def botao_voltar_Minhaplantacao():
+    tela_minhaplantacao()
+# coletando dados e salvando no banco de dados
+def AddPlantacao():
+    if entry_area.get() == '' or entry_cultura.get() == '':
+        messagebox.showerror('Cadastro', 'Preencha todos os campos!')
+    else:
+        AdicionarPlantacao(UsuarioLogado, entry_cultura.get(), entry_area.get())
+        messagebox.showinfo('Cadastro', 'Área adicionada com sucesso!')
+        tela_minhaplantacao()
+
+botao_salvar = CTkButton(frame_adicionar_area, text='SALVAR', width=150,
+                                        font=('Josefin Sans bold', 14), fg_color=laranja, command=AddPlantacao)
+botao_salvar.place(x=360, y=300)
+
+botaovoltar = CTkButton(frame_adicionar_area, command=botao_voltar_Minhaplantacao,
+                                        text='VOLTAR', width=150, font=('Josefin Sans bold', 14), fg_color=amarelo)
+botaovoltar.place(x=190, y=300)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Tela Perfil
+
+frame_perfil = CTkFrame(window)
+
+# editando o frame
+label_perfil = CTkLabel(frame_perfil, text='PERFIL :', font=(
+    'Josefin Sans bold', 30), text_color=laranja)
+label_perfil.place(x=25, y=5)
+
+l_apelido = CTkLabel(frame_perfil, text='Apelido :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_apelido.place(x=25, y=110)
+
+l_senha = CTkLabel(frame_perfil, text='Senha :', font=(
+    'josefin Sans bold', 20), text_color=laranja)
+l_senha.place(x=345, y=110)
+
+l_nome = CTkLabel(frame_perfil, text='Nome :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_nome.place(x=25, y=160)
+
+l_sobrenome = CTkLabel(frame_perfil, text='Sobrenome :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_sobrenome.place(x=345, y=160)
+
+l_idade = CTkLabel(frame_perfil, text='Idade :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_idade.place(x=25, y=210)
+
+l_email = CTkLabel(frame_perfil, text='Email :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_email.place(x=345, y=210)
+
+l_cidade = CTkLabel(frame_perfil, text='Cidade :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_cidade.place(x=25, y=260)
+
+l_pais = CTkLabel(frame_perfil, text='País :', font=(
+    'Josefin Sans bold', 20), text_color=laranja)
+l_pais.place(x=345, y=260)
+
+
+# botao de voltar
+def botao_voltar_perfil():
+    frame_perfil.pack_forget()
+    tela_gerenciamento()
+
+b_voltar = CTkButton(frame_perfil, command=botao_voltar_perfil,
+                                    text='VOLTAR', width=150, font=('Josefin Sans bold', 14), fg_color=amarelo)
+b_voltar.place(x=25, y=350)
+
+window.mainloop()
