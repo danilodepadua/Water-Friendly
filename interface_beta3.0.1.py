@@ -550,7 +550,7 @@ class WaterFriendlyApp:
         # crinado o grafico de area-------------------------------------------------------------------
         fig, ax = plt.subplots(figsize=(10, 10))
         labels = ['Área total', 'Área da planta']
-        ax.pie([area_total-area_planta, area_planta], labels=labels, autopct='%1.1f%%',
+        ax.pie([area_total-area_planta, area_planta], autopct='%1.1f%%',
                textprops={'fontsize': 30, 'color': 'white'}, colors=[azul_claro, laranja])
         plt.legend(labels, fontsize="20", loc="upper right")
         ax.axis('equal')
