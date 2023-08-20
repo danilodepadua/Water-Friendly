@@ -28,7 +28,7 @@ PlantasInfos = {
     'ALFACE': 100000,
     'ALMEIRÃO': 100000,
     'BATATA': 100000,
-    'BERINJELA': 100000,
+    'BERINGELA': 100000,
     'BETERRABA': 100000,
     'BROCOLIS': 100000,
     'CENOURA': 100000,
@@ -62,10 +62,30 @@ con = lite.connect('water.db')  # Nome do banco
 with con:
     cursor = con.cursor()  # Criando o cursor
     cursor.execute("CREATE TABLE IF NOT EXISTS Usuarios (apelido TEXT PRIMARY KEY, Nome TEXT, Sobrenome TEXT, idade TEXT, email TEXT, cidade TEXT, sigla_pais TEXT, Senha TEXT, imagem_perfil TEXT)")  # Primeira tabela
-    cursor.execute("CREATE TABLE IF NOT EXISTS Plantacoes (id INTEGER PRIMARY KEY,User TEXT, Planta_Nome TEXT, Tamanho INTEGER, Cultura TEXT, FOREIGN KEY(User) REFERENCES Usuarios(apelido) ON DELETE CASCADE)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS Plantacoes (id INTEGER PRIMARY KEY,User TEXT, Planta_Nome TEXT, Tamanho INTEGER, Cultura TEXT, FOREIGN KEY(User) REFERENCES Usuarios(apelido))")
     cursor.execute("CREATE TABLE IF NOT EXISTS Sensores (ident INTEGER PRIMARY KEY, id_plantacao INTEGER, absorsao INTEGER, FOREIGN KEY(id_plantacao) REFERENCES Plantacoes(id) ON DELETE CASCADE)")
 
 # -----------------------------------------------------------------------------------
+imagem_botoes = {
+    'ALFACE': 'alface.png',
+    'ALMEIRÃO': 'almeirao.png',
+    'BATATA': 'batata.png',
+    'BERINGELA': 'berinjela.png',
+    'BETERRABA': 'beterraba.png',
+    'BROCOLIS': 'brocolis.png',
+    'CENOURA': 'cenoura.png',
+    'CEBOLA': 'cebola.png',
+    'COUVE': 'couve.png',
+    'COUVE-FLOR': 'couve-flor.png',
+    'ESPINAFRE': 'espinafre.png',
+    'FEIJÃO': 'feijao.png',
+    'TOMATE': 'tomate.jpg',
+    'PIMENTÃO': 'pimentao.png',
+    'CAFÉ': 'cafe.png',
+    'BROCOLIS': 'brocolis.png',
+}
+
+
 class WaterFriendlyApp:
     # construtor da classe------------------------------------------------------
     def __init__(self, root):
@@ -78,68 +98,8 @@ class WaterFriendlyApp:
         self.create_frames()
         self.loop = asyncio.get_event_loop()
         self.MMchuva = 0
-    #adicionar os sensores-----------------------------------------------------
-    def Adicionar_Sensores(self, Quantidade, id):
-        conn = lite.connect('water.db')  # Abrir a conexão com o banco de dados
-        cursorr = conn.cursor()  # Criar um cursor para executar as consultas
-        # Habilitar as chaves estrangeiras
-        cursorr.execute("PRAGMA foreign_keys = ON")
-        for i in range(0, Quantidade):
-            cursorr.execute("INSERT INTO Sensores (id_plantacao, absorsao) VALUES (?, ?)",
-                            (id, random.randint(1, 10)))  # Inserir os dados na tabela
-        conn.commit()  # Salvar as alterações no banco de dados
-        conn.close()  # Fechar a conexão com o banco de dados
-    #atualizar os sensores-----------------------------------------------------
-    def Renovar_Sensores(self, Quantidade, id):
-        con = lite.connect('water.db')  # Abrir a conexão com o banco de dados
-        cursor = con.cursor()  # Criar um cursor para executar as consultas
-        # Habilitar as chaves estrangeiras
-        cursor.execute("PRAGMA foreign_keys = ON")
-        # Consulta para obter a quantidade de sensores
-        cursor.execute(
-            "SELECT COUNT(*) FROM Sensores WHERE id_plantacao = ?", (id,))
-        QuantidadeAtual = cursor.fetchone()[0]
-        sensores = cursor.execute(
-            'SELECT * FROM Sensores WHERE id_plantacao = ?', (id,)).fetchall()
-        if QuantidadeAtual < Quantidade:
-            for i in range(0, Quantidade - QuantidadeAtual):
-                cursor.execute(
-                    "INSERT INTO Sensores (id_plantacao, absorsao) VALUES (?, ?)", (id, random.randint(1, 10)))
-        elif QuantidadeAtual > Quantidade:
-            for i in range(0, QuantidadeAtual - Quantidade):
-                id_sensor = sensores[i][0]
-                cursor.execute(
-                    "DELETE FROM Sensores WHERE ident = ?", (id_sensor,))
-        con.commit()  # Salvar as alterações no banco de dados
-        con.close()  # Fechar a conexão com o banco de dados
-    #agua absorvida pelo solo---------------------------------------------------
-    def AguaChuva(self, id, planta_nome, usuario_logado):
-        con = lite.connect('water.db')
-        cursor = con.cursor()
-        # Consulta para obter a quantidade de sensores
-        cursor.execute(
-            "SELECT COUNT(*) FROM Sensores WHERE id_plantacao = ?", (id,))
-        quant = cursor.fetchone()[0]
-        # Consulta para obter os sensores
-        cursor.execute("SELECT * FROM Sensores WHERE id_plantacao = ?", (id,))
-        Sensores = cursor.fetchall()
+    # adicionar os sensores-----------------------------------------------------
 
-        # Consulta para obter o tamanho da área da planta
-        cursor.execute("SELECT Tamanho FROM Plantacoes WHERE User=? AND Planta_Nome=?",
-                       (usuario_logado, planta_nome))
-        resultado = cursor.fetchone()
-        tamanho_area_planta_1 = resultado[0]
-        con.close()
-        AguaTotal = 0
-        div = int(tamanho_area_planta_1) * 10000 / quant
-        for i in range(0, quant):
-            # Obtém o valor da absorção aleatória
-            variacao = Sensores[i][2] * 0.1
-            # Multiplica pela absorção correspondente (de 0.1 a 1.0)
-            AguaTotal += self.MMchuva * div * variacao
-
-        return AguaTotal
-    #exibir frame login---------------------------------------------------------
     def create_frames(self):
         self.frame_right = CTkFrame(master=self.root, width=400, height=596)
         self.frame_right.pack(side=RIGHT)
@@ -180,6 +140,7 @@ class WaterFriendlyApp:
             'Josefin Sans bold', 12), fg_color=laranja, command=self.create_registration_page)
         botao_cadastro.place(x=90, y=300)
     # verificar se o usuario e senha estao corretos----------------------------
+
     def verificar_credenciais(self, usuario, senha):
         try:
             con = lite.connect('water.db')  # conecta com o banco de dados
@@ -196,6 +157,7 @@ class WaterFriendlyApp:
                                  f"Ocorreu um erro no banco de dados: {e}")  # mostra uma mensagem de erro caso ocorra um erro no banco de dados
             return False  # retorna False
     # mostrar a senha do usuario caso ele queira----------------------------------
+
     def mostrar_senha(self):
         if self.check_box.get() == 1:  # pega o valor do check box e verifica se ele esta marcado com o 1
             self.entry_senha.configure(show='')  # mostra a senha sem os *
@@ -203,6 +165,7 @@ class WaterFriendlyApp:
             # senão mostra a senha com os *
             self.entry_senha.configure(show='*')
     # verificar e ir adiante-----------------------------------------------------
+
     def fazer_login(self):
         # variavel global para armazenar o usuario logado e busca-lo futuramente
         global usuario_logado
@@ -226,14 +189,14 @@ class WaterFriendlyApp:
             # mostra uma mensagem de aviso caso o usuario ou senha estejam incorretos
             messagebox.showwarning('Login', 'Usuário ou senha incorretos')
     # destroi o frame anterior---------------------------------------------------
+
     def destruir_frame(self):
         for frame in root.winfo_children():  # Itera pelos frames
             frame.destroy()  # Destroi o frame atual
-    # cria a tela de cadastro----------------------------------------------------
+
     def create_registration_page(self):
         self.frame_right.pack_forget()  # esquecer o frame do login
         self.frame_left.pack_forget()  # esquecer o frame do login
-        # Criando a tela nova-----------------------------------------------------
         frame_cadastro_inteiro = customtkinter.CTkFrame(
             master=self.root, width=800, height=596)
         frame_cadastro_inteiro.pack()
@@ -296,6 +259,7 @@ class WaterFriendlyApp:
         botao_voltar.place(x=160, y=500)
         botao_voltar.configure(corner_radius=10)  # arredondar o botao
     # Função para cadastrar no banco de dados a partir da tela de cadastro---------
+
     def cadastrar_no_banco(self):
         # Pegar os valores dos campos do cadastro-------------------------
         usuario_1 = self.entry_usuario_1.get()
@@ -334,6 +298,7 @@ class WaterFriendlyApp:
         finally:  # Executa o código abaixo, independente se ocorreu um erro ou não para fecha a conexão com o banco de dados
             con.close()
     # avancar para a tela de gerenciamento depois do botao de cadastrar-----------
+
     def avancar_pagina(self):
         # Pegar os valores dos campos do cadastro-------------------------
         usuario_1 = self.entry_usuario_1.get()
@@ -369,8 +334,8 @@ class WaterFriendlyApp:
             usuario_logado = usuario_1  # Armazena o usuário na variável global
             self.tela_gerenciamento()  # Chama a tela de gerenciamento
     # criando a tela de gerenciamento--------------------------------------------
+
     def tela_gerenciamento(self):
-        # Destruindo o frame anterior
         self.destruir_frame()
         # Criando a tela nova--------------------------------------------
         frame_gerenciamento_inteiro = customtkinter.CTkFrame(
@@ -385,13 +350,13 @@ class WaterFriendlyApp:
         label_gerenciamento.place(x=50, y=25)
         # Botão de perfil--------------------------------------------
         self.botao_perfil = customtkinter.CTkButton(
-            master=frame_corzinha, text='PERFIL', width=100, font=('Josefin Sans bold', 14), fg_color=laranja, command=self.tela_perfil)
-        self.botao_perfil.place(x=50, y=40)
+            master=frame_corzinha, text='PERFIL', width=100, font=('Josefin Sans bold', 14), fg_color=azul, command=self.tela_perfil)
+        self.botao_perfil.place(x=100, y=40)
         self.botao_perfil.configure(corner_radius=10)
         # Botão de minha plantação--------------------------------------------
         self.botao_minhaplantacao = customtkinter.CTkButton(
-            master=frame_corzinha, command=self.tela_minhaplantacao, text='MINHA PLANTAÇÃO', width=100, font=('Josefin Sans bold', 14), fg_color=laranja)
-        self.botao_minhaplantacao.place(x=300, y=40)
+            master=frame_corzinha, command=self.tela_minhaplantacao, text='CULTIVO', width=100, font=('Josefin Sans bold', 14), fg_color=azul)
+        self.botao_minhaplantacao.place(x=400, y=40)
         self.botao_minhaplantacao.configure(corner_radius=10)
         # Botão de logout--------------------------------------------
 
@@ -403,6 +368,7 @@ class WaterFriendlyApp:
             master=frame_gerenciamento_inteiro, command=logout, text='SAIR', width=100, font=('Josefin Sans bold', 14), fg_color=vermelho)
         self.botao_logout.place(x=200, y=500)
     # criando a tela de perfil---------------------------------------------------
+
     def tela_minhaplantacao(self):
         self.destruir_frame()  # Destruindo o frame anterior
         self.frame_myplant = customtkinter.CTkFrame(  # Criando o frame
@@ -426,6 +392,7 @@ class WaterFriendlyApp:
             'Josefin Sans bold', 12), fg_color=amarelo)
         botao_voltar.place(x=170, y=95)
     # criando a tela de perfil---------------------------------------------------
+
     def salvar_area(self):
         tamanho = self.entry_area.get()  # pega o tamanho da area
         plantacao_Nome = self.Entry_Nome.get().upper()  # pega o nome da planta
@@ -448,11 +415,13 @@ class WaterFriendlyApp:
                 'Cadastro', 'Cadastro realizado com sucesso!')  # Mostrar uma mensagem de sucesso
             # Após cadastrar a planta, chame a função para exibir as plantas novamente
             self.exibir_plantas()
-        except:
+        except lite.Error as e:
             # Mostrar uma mensagem de erro caso ocorra um erro no banco de dados
             messagebox.showerror('Cadastro', 'Erro ao cadastrar!')
+            print(e)
         con.close()  # Fechar a conexão com o banco de dados
     # exibir as plantas cadastradas----------------------------------------------
+
     def adicionar_area(self):
         self.frame_myplant.pack_forget()  # Destruindo o frame anterior
         # Criando a tela nova--------------------------------------------
@@ -479,18 +448,19 @@ class WaterFriendlyApp:
             master=self.frame_adicionar_area, text='ADICIONAR ÁREA :', font=('Josefin Sans bold', 30), text_color=laranja)
         label_adicionar_area.place(x=25, y=3)
         # Botão de salvar--------------------------------------------
-        botao_salvar = customtkinter.CTkButton(master=self.frame_adicionar_area, text='SALVAR', width=150,
+        botao_salvar = customtkinter.CTkButton(master=self.frame_adicionar_area, text='SALVAR', width=10,
                                                font=('Josefin Sans bold', 14), fg_color=laranja, command=self.salvar_area)
-        botao_salvar.place(x=360, y=450)
+        botao_salvar.place(x=310, y=450)
 
         def botao_voltar():  # Função para voltar para a tela de gerenciamento
             self.frame_adicionar_area.pack_forget()  # esquecer o frame de adicionar area
             self.frame_myplant.pack()  # mostrar o frame de gerenciamento
         # Botão de voltar--------------------------------------------
         botaovoltar = customtkinter.CTkButton(master=self.frame_adicionar_area, command=botao_voltar,
-                                              text='VOLTAR', width=150, font=('Josefin Sans bold', 14), fg_color=amarelo)
-        botaovoltar.place(x=190, y=450)
+                                              text='VOLTAR', width=100, font=('Josefin Sans bold', 14), fg_color=amarelo)
+        botaovoltar.place(x=140, y=450)
     # exibir as plantas cadastradas----------------------------------------------
+
     def acessar_planta(self, planta_nome):
         # Destruindo o frame anterior----------------------
         self.frame_myplant.pack_forget()
@@ -514,6 +484,10 @@ class WaterFriendlyApp:
         botao_update_2 = customtkinter.CTkButton(master=self.frame_planta, text='ATUALIZAR', command=lambda: self.alterar_tamanho(planta_nome), width=100, font=(
             'Josefin Sans bold', 14), fg_color=azul)
         botao_update_2.place(x=220, y=500)
+        #botao das fotos-------------------------------------
+        botao_fotos = customtkinter.CTkButton(master=self.frame_planta, text='FOTOS', width=100, font=(
+            'Josefin Sans bold', 14), fg_color=verde)
+        botao_fotos.place(x=520, y=500)
         # Criando o tabview------------------------------------
         tabview = customtkinter.CTkTabview(
             master=self.frame_planta, width=690, height=400)
@@ -527,6 +501,7 @@ class WaterFriendlyApp:
             0, weight=1)  # Configurando o grid
         tabview.tab('Irrigação').grid_columnconfigure(
             0, weight=1)  # Configurando o grid
+
         # ------------------------------------------------
         con = lite.connect('water.db')  # Abrir a conexão com o banco de dados
         cursor = con.cursor()  # Criar um cursor para executar as consultas
@@ -535,10 +510,33 @@ class WaterFriendlyApp:
             "SELECT SUM(Tamanho) FROM Plantacoes WHERE User=?", (usuario_logado,))  # Consulta para obter a área total de todas as culturas do usuário
         area_total = cursor.fetchone()[0]  # Área total de todas as culturas
         # Consulta para obter a área da planta ESPECÍFICA selecionada
-        cursor.execute("SELECT Tamanho FROM Plantacoes WHERE User=? AND Planta_Nome=?",  # Consulta para obter a área da planta ESPECÍFICA selecionada
+        cursor.execute("SELECT Tamanho FROM Plantacoes WHERE User=? AND Cultura=?",  # Consulta para obter a área da planta ESPECÍFICA selecionada
                        (usuario_logado, planta_nome))
         area_planta = cursor.fetchone()[0]  # Área da planta específica
-        con.close()  # Fechar a conexão com o banco de dados
+        cursor.execute(
+            "SELECT * FROM Plantacoes WHERE Planta_Nome = ?", (planta_nome,))
+        resultado = cursor.fetchone()
+        id_1 = resultado[0]
+        cursor.execute(
+            "SELECT COUNT(*) FROM Sensores WHERE id_plantacao = ?", (id_1,))
+        Quantidade_Atual = cursor.fetchone()[0]
+        con.close()
+        # informaçao da quantidade de agua que a planta precisa-------------------------
+        agua_precisa = PlantasInfos[planta_nome] * area_planta
+        l_agua_precisa = customtkinter.CTkLabel(master=tabview.tab('Informações'), text='Água que a cultura necessita:', font=(
+            'Josefin Sans bold', 14), text_color=laranja)
+        l_agua_precisa.place(x=20, y=70)
+        l_agua_precisa_2 = customtkinter.CTkLabel(master=tabview.tab('Informações'), text=f"{agua_precisa} L", font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        l_agua_precisa_2.place(x=230, y=70)
+        # informar a quantidade de sensor que a planta precisa-------------------------
+        n_sensores = customtkinter.CTkLabel(master=tabview.tab('Informações'), text='Quantidade de sensores:', font=(
+            'Josefin Sans bold', 14), text_color=laranja)
+        n_sensores.place(x=20, y=120)
+        n_sensores_2 = customtkinter.CTkLabel(master=tabview.tab('Informações'), text=f"{Quantidade_Atual} sensores", font=(
+            'Josefin Sans bold', 14), text_color=branco)
+        n_sensores_2.place(x=200, y=120)
+
         # editando o tabview de informaçoes---------------------------------------------------------
         l_area = customtkinter.CTkLabel(master=tabview.tab('Informações'), text='Área da planta:', font=(
             'Josefin Sans bold', 14), text_color=laranja)
@@ -549,10 +547,11 @@ class WaterFriendlyApp:
         l_area_planta.place(x=150, y=20)
         # crinado o grafico de area-------------------------------------------------------------------
         fig, ax = plt.subplots(figsize=(10, 10))
-        ax.pie([area_total-area_planta, area_planta], labels=['Área total', 'Área da planta'], autopct='%1.1f%%',
-               textprops={'fontsize': 30, 'color': 'white'}, colors=[azul_claro, laranja])
+        labels = ['Área restante', 'Área da planta']
+        ax.pie([area_total-area_planta, area_planta], autopct='%1.1f%%',
+               textprops={'fontsize': 30, 'color': 'white'}, colors=[azul, laranja])
+        plt.legend(labels, fontsize="20", loc="upper right")
         ax.axis('equal')
-        plt.tight_layout()
         plt.savefig('grafico.png', transparent=True)
         plt.close()
         # Criar a imagem--------------------------------------------------------------------------------------------------------------------------
@@ -562,7 +561,11 @@ class WaterFriendlyApp:
         label_imagem_grafico = customtkinter.CTkLabel(
             master=tabview.tab('Informações'), image=imagem_grafico, text='')  # Posicionar a imagem
         # Posicionar a imagem no tabview
-        label_imagem_grafico.place(x=370, y=20)
+        label_imagem_grafico.place(x=440, y=50)
+        label_area = customtkinter.CTkLabel(master=tabview.tab('Informações'), text='ÁREA', font=(
+            'Josefin Sans bold', 25), text_color=branco)
+        label_area.place(x=540, y=30)
+
         # conexao com o banco de dados--------------------------------------------------------------------------------------------
         con = lite.connect('water.db')  # Abrir a conexão com o banco de dados
         cursor = con.cursor()   # Criar um cursor para executar as consultas
@@ -579,24 +582,29 @@ class WaterFriendlyApp:
         id = resultado[0]
         con.close()  # Fechar a conexão com o banco de dados
         # chamando a função de previsão do tempo e agua da chuva ---------------------------------------------------------
-        # rodar de forma assincrona dentro de uma função normal
         asyncio.run(self.exibir_previsao(cidade_2, pais_2, tabview))
-        # relatorio de irrigação---------------------------------------------------------
-        b_dia_1 = customtkinter.CTkButton(master=tabview.tab("Irrigação"), text='Dia 1', width=100, font=(
-            'Josefin Sans bold', 14), fg_color=azul, command=lambda: self.dia_1(planta_nome))
-        b_dia_1.place(x=20, y=50)
-        b_dia_2 = customtkinter.CTkButton(master=tabview.tab("Irrigação"), text='Dia 2', width=100, font=(
-            'Josefin Sans bold', 14), fg_color=azul)
-        b_dia_2.place(x=150, y=50)
-        b_dia_3 = customtkinter.CTkButton(master=tabview.tab("Irrigação"), text='Dia 3', width=100, font=(
-            'Josefin Sans bold', 14), fg_color=azul)
-        b_dia_3.place(x=280, y=50)
-        b_dia_4 = customtkinter.CTkButton(master=tabview.tab("Irrigação"), text='Dia 4', width=100, font=(
-            'Josefin Sans bold', 14), fg_color=azul)
-        b_dia_4.place(x=410, y=50)
-        b_dia_5 = customtkinter.CTkButton(master=tabview.tab("Irrigação"), text='Dia 5', width=100, font=(
-            'Josefin Sans bold', 14), fg_color=azul)
-        b_dia_5.place(x=540, y=50)
+        start_date = datetime.datetime.now().date()  # Pegar a data atual
+        
+        
+        x_position = 20  # Posição inicial X
+        relatorio_label = customtkinter.CTkLabel(master=tabview.tab('Irrigação'), text='RELATÓRIO DE IRRIGAÇÃO', font=(
+            'Josefin Sans bold', 20), text_color=branco)
+        relatorio_label.place(x=210, y=20)
+
+        # for para criar os botões de irrigação---------------------------------------------------------
+        for day_number in range(1, 6):
+            formatted_date = (
+                start_date + datetime.timedelta(days=day_number - 1)).strftime('%d/%m')
+            button = customtkinter.CTkButton(
+                master=tabview.tab("Irrigação"),
+                text=f'Dia {formatted_date}',
+                width=100,
+                font=('Josefin Sans bold', 14),
+                fg_color=azul,
+                command=lambda planta_nome=planta_nome, day_number=day_number: self.show_irrigation_info(planta_nome, day_number))
+            button.place(x=x_position, y=100)
+            x_position += 130  # Ajustar a posição X para o próximo botão
+
     # assicronizar a previsão do tempo---------------------------------------------------
     async def exibir_previsao(self, cidade_2, pais_2, tabview):
         # url da previsao do tempo
@@ -608,19 +616,9 @@ class WaterFriendlyApp:
                 previsao_data = await response.json()  # transforma a resposta da API em um dicionario com o json, o await espera a resposta da API, e depois transforma a resposta em um dicionario com o json, precisa esperar pegar todos os dados da API
                 # await é sempre necessario quando for fazer uma requisição de uma API assincrona
         dia_atual = datetime.datetime.now()  # pegar a data atual
-        # colocar agua da chuva---------------------------------------------------------
-        if response.status == 200:  # se retornar 200, significa que a requisição foi bem sucedida
-            # await espera a resposta da API, e depois transforma a resposta em um dicionario com o json, precisa esperar pegar todos os dados da API
-            # se tiver chuva na previsao diaria
-            if 'rain' in previsao_data['list'][0]:
-                # pegar a quantidade de chuva em 3 horas pois é assim que a API retorna, a cada 3 horas
-                chuva_3h = previsao_data['list'][0]['rain']['3h']
-                # como estou rodando o programa poucas vezes, multiplico por 8 para ter uma quantidade de chuva diaria seria 3x8=24
-                self.MMchuva = chuva_3h * 3
-                # texto da chuva diaria---------------------------------------------------------
-                texto_chuva_diaria = customtkinter.CTkLabel(master=tabview.tab(
-                    "Irrigação"), text=f'Chuva diária: {self.MMchuva} mm', font=('Josefin Sans bold', 14), text_color=azul_claro)
-                texto_chuva_diaria.place(x=30, y=5)  # Posiciona o texto
+        # colocar agua da chuva--------------------------------------------------------
+        # texto da chuva diaria---------------------------------------------------------
+
         # for pra criar a previsão do tempo---------------------------------------------------------
         for i in range(0, 5):
             previsao = previsao_data['list'][i]['weather'][0]['description']
@@ -645,7 +643,40 @@ class WaterFriendlyApp:
             texto_temp_previsao = customtkinter.CTkLabel(master=tabview.tab(
                 "Tempo"), text=f'{temperatura_previsao:.2f}°C', font=('Josefin Sans bold', 14), text_color=branco)
             texto_temp_previsao.place(x=40+130*i, y=210)
+    # assincronizar a quantidade de chuva---------------------------------------------------
+
+    async def quantidade_de_chuva(self, planta_nome):
+        con = lite.connect('water.db')
+        cursor = con.cursor()
+
+        cursor.execute(
+            "SELECT * from Usuarios WHERE apelido = ? ", (usuario_logado,))
+        resultado = cursor.fetchone()
+        cidade_3 = resultado[5]
+        pais_3 = resultado[6]
+        con.close()
+
+        previsao_url = f'https://api.openweathermap.org/data/2.5/forecast?q={cidade_3},{pais_3 }&appid={API_KEY}&lang=pt_br&units=metric&cnt=5'
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(previsao_url) as response:
+                previsao_data = await response.json()
+
+        quantidades_chuva = []
+
+        if response.status == 200:
+            for x in range(0, 5):
+                if 'rain' in previsao_data['list'][x]:
+                    chuva_3h = previsao_data['list'][x]['rain']['3h']
+                    quantidade_chuva_3h = chuva_3h * 3  # Calcula a quantidade de chuva em 3 horas
+
+                    quantidade_diaria_restante = quantidade_chuva_3h
+
+                    quantidades_chuva.append(quantidade_diaria_restante)
+
+        return quantidades_chuva
     # funçao de remover a planta---------------------------------------------------
+
     def remover_planta(self, planta_nome):
         con = lite.connect('water.db')  # Abrir a conexão com o banco de dados
         cursor = con.cursor()  # Criar um cursor para executar as consultas
@@ -654,7 +685,7 @@ class WaterFriendlyApp:
         resposta_1 = messagebox.askyesno('Remover', 'Deseja remover a planta?')
         if resposta_1 == True:
             cursor.execute(
-                "DELETE FROM Plantacoes WHERE Planta = ?", (planta_nome,))  # Remover a planta do banco de dados
+                "DELETE FROM Plantacoes WHERE Cultura = ?", (planta_nome,))  # Remover a planta do banco de dados
             con.commit()  # Salvar as alterações no banco de dados com o comando commit
             con.close()  # Fechar a conexão com o banco de dados
             # adicionando a mensegem de sucesso
@@ -663,35 +694,109 @@ class WaterFriendlyApp:
             self.tela_minhaplantacao()  # Atualizar a tela
         else:
             return
-    # exibir as plantas cadastradas----------------------------------------------
+    # exibir a planta---------------------------------------------------
+
     def exibir_plantas(self):
         x_pos_planta = 40  # Posição inicial x do botão
         y_pos_planta = 40  # Posição inicial y do botão
         botao_width_planta = 100  # Largura do botão
         botao_height_planta = 40  # Altura do botão
-        botao_margin_x_planta = 27  # Margem x entre os botões
-        botao_margin_y_planta = 30  # Margem y entre os botões
+        botao_margin_x_planta = 70  # Margem x entre os botões
+        botao_margin_y_planta = 70  # Margem y entre os botões
         con = lite.connect('water.db')  # Conectando no banco de dados
         cursor = con.cursor()  # Criando o cursor
         cursor.execute(
-            "SELECT Planta_Nome FROM Plantacoes WHERE User=?", (usuario_logado,))  # Obtendo as plantas do usuário, a partir da chave estrangeira
+            "SELECT Cultura FROM Plantacoes WHERE User=?", (usuario_logado,))  # Obtendo as plantas do usuário, a partir da chave estrangeira
         plantas = cursor.fetchall()
         con.close()
+
         # Lógica do for : plantas é o resultado apartir do fetchall recupera todas as plantas do usuário e cria um botão ate que o número limites das
-        # plantas seja atingido, por isso o uso do for
         for planta in plantas:
-            self.botao_planta = customtkinter.CTkButton(master=self.frame_corzao, text=planta[0], width=botao_width_planta, font=(
-                'Josefin Sans bold', 12), fg_color=laranja, command=lambda planta_nome=planta[0]: self.acessar_planta(planta_nome))  # Acessar a planta
-            self.botao_planta.place(
-                x=x_pos_planta, y=y_pos_planta)  # Posicionar o botão
-
-            x_pos_planta += botao_width_planta + botao_margin_x_planta
-
-            if x_pos_planta + botao_width_planta > 800:  # Verificar se o botão ultrapassou a largura da tela que é 700
-                x_pos_planta = 40  # Posicionar o botão na posição inicial
-                # atualizar o valor de y para que o botão seja posicionado na linha de baixo
-                y_pos_planta += botao_height_planta + botao_margin_y_planta
+            planta_nome = planta[0]
+            if planta_nome in imagem_botoes:
+                add_imagem = customtkinter.CTkImage(light_image=Image.open(
+                    f'{planta_nome}.png'), dark_image=Image.open(f'{planta_nome}.png'), size=(50, 50))
+                self.botao_planta = customtkinter.CTkButton(master=self.frame_corzao, text=planta_nome, width=botao_width_planta, font=(
+                    'Josefin Sans bold', 12), fg_color=azul, command=lambda planta_nome=planta_nome: self.acessar_planta(planta_nome), image=add_imagem, height=50, anchor='center', compound='top')  # Acessar a planta
+                self.botao_planta.place(
+                    x=x_pos_planta, y=y_pos_planta)  # Posicionar o botão
+                x_pos_planta += botao_width_planta + botao_margin_x_planta
+                if x_pos_planta + botao_width_planta > 800:
+                    x_pos_planta = 40
+                    y_pos_planta += botao_height_planta + botao_margin_y_planta
     # tela de alterar o tamanho------------------------------------------------------------
+
+    def Adicionar_Sensores(self, Quantidade, id):
+        conn = lite.connect('water.db')  # Abrir a conexão com o banco de dados
+        cursorr = conn.cursor()  # Criar um cursor para executar as consultas
+        # Habilitar as chaves estrangeiras
+        cursorr.execute("PRAGMA foreign_keys = ON")
+        for i in range(0, Quantidade):
+            cursorr.execute("INSERT INTO Sensores (id_plantacao, absorsao) VALUES (?, ?)",
+                            (id, random.randint(1, 10)))  # Inserir os dados na tabela
+        conn.commit()  # Salvar as alterações no banco de dados
+        conn.close()  # Fechar a conexão com o banco de dados
+    # atualizar os sensores-----------------------------------------------------
+
+    def Renovar_Sensores(self, Quantidade, id):
+        con = lite.connect('water.db')  # Abrir a conexão com o banco de dados
+        cursor = con.cursor()  # Criar um cursor para executar as consultas
+        # Habilitar as chaves estrangeiras
+        cursor.execute("PRAGMA foreign_keys = ON")
+        # Consulta para obter a quantidade de sensores
+        cursor.execute(
+            "SELECT COUNT(*) FROM Sensores WHERE id_plantacao = ?", (id,))
+        QuantidadeAtual = cursor.fetchone()[0]
+        sensores = cursor.execute(
+            'SELECT * FROM Sensores WHERE id_plantacao = ?', (id,)).fetchall()
+        if QuantidadeAtual < Quantidade:
+            for i in range(0, Quantidade - QuantidadeAtual):
+                cursor.execute(
+                    "INSERT INTO Sensores (id_plantacao, absorsao) VALUES (?, ?)", (id, random.randint(1, 10)))
+        elif QuantidadeAtual > Quantidade:
+            for i in range(0, QuantidadeAtual - Quantidade):
+                id_sensor = sensores[i][0]
+                cursor.execute(
+                    "DELETE FROM Sensores WHERE ident = ?", (id_sensor,))
+        con.commit()  # Salvar as alterações no banco de dados
+        con.close()  # Fechar a conexão com o banco de dados
+    # agua absorvida pelo solo---------------------------------------------------
+
+    async def AguaChuva(self, id, planta_nome):
+        con = lite.connect('water.db')
+        cursor = con.cursor()
+
+        cursor.execute(
+            "SELECT COUNT(*) FROM Sensores WHERE id_plantacao = ?", (id,))
+        quant = cursor.fetchone()[0]
+
+        cursor.execute("SELECT * FROM Sensores WHERE id_plantacao = ?", (id,))
+        Sensores = cursor.fetchall()
+
+        cursor.execute("SELECT Tamanho FROM Plantacoes WHERE User=? AND Cultura=?",
+                       (usuario_logado, planta_nome))
+        resultado = cursor.fetchone()
+        tamanho_area_planta_1 = resultado[0]
+        con.close()
+
+        AguaTotalPorDia = []  # Lista para armazenar a quantidade de água absorvida por dia
+
+        div = int(tamanho_area_planta_1) * 10000 / quant
+
+        # Chamar a função quantidade_de_chuva para obter as quantidades de chuva previstas
+        quantidades_chuva = await self.quantidade_de_chuva(planta_nome)
+
+        for dia in range(1, 6):  # Loop para os dias de 1 a 5
+            AguaTotal = 0
+            for i in range(quant):  # Loop para cada sensor no dia
+                variacao = Sensores[i][2] * 0.1
+                if dia - 1 < len(quantidades_chuva):
+                    AguaTotal += quantidades_chuva[dia - 1] * div * variacao
+            AguaTotalPorDia.append(AguaTotal)
+
+        return AguaTotalPorDia
+
+    # exibir frame login------------------------------------------
     def alterar_tamanho(self, planta_nome):
         self.destruir_frame()
         # Criando a nova tela--------------------------------------------
@@ -712,6 +817,7 @@ class WaterFriendlyApp:
             master=self.frame_alterar_tamanho, width=300, placeholder_text='Quantidade de sensores')
         self.entry_Sensores2.place(x=225, y=300)
         # Função para salvar o tamanho----------------------------------------------
+
         def salvar_tamanho(planta_nome):
             novo_tamanho = self.entry_tamanho_2.get()  # Obter o novo tamanho da entrada
             Quantidade = self.entry_Sensores2.get()
@@ -723,10 +829,10 @@ class WaterFriendlyApp:
             con = lite.connect('water.db')
             cursor = con.cursor()
             cursor.execute("PRAGMA foreign_keys = ON")
-            cursor.execute("UPDATE Plantacoes SET tamanho = ? WHERE User = ? AND Planta_Nome = ?", (
+            cursor.execute("UPDATE Plantacoes SET tamanho = ? WHERE User = ? AND Cultura = ?", (
                 novo_tamanho, usuario_logado, planta_nome))  # Atualizar o tamanho da planta
             con.commit()  # Salvar as alterações
-            id = cursor.execute("SELECT id FROM Plantacoes WHERE User = ? AND Planta_Nome = ?", (
+            id = cursor.execute("SELECT id FROM Plantacoes WHERE User = ? AND Cultura = ?", (
                 usuario_logado, planta_nome)).fetchone()[0]
             self.Renovar_Sensores(int(Quantidade), id)
             con.close()  # Fechar a conexão com o banco de dados
@@ -740,6 +846,7 @@ class WaterFriendlyApp:
             command=lambda: salvar_tamanho(planta_nome))
         botao_salvar.place(x=425, y=450)
         # Botão de voltar--------------------------------------------
+
         def botao_voltar_4():  # Função para voltar para a tela de gerenciamento
             self.frame_alterar_tamanho.pack_forget()  # esquecer o frame de alterar tamanho
             self.acessar_planta(planta_nome)  # mostrar o frame de update
@@ -748,59 +855,88 @@ class WaterFriendlyApp:
             'Josefin Sans bold', 14), fg_color=amarelo, command=botao_voltar_4)
         botaovoltar.place(x=225, y=450)
     # BOTAO DIA 1 ---------------------------------------------------
-    def dia_1(self, planta_nome):
+
+    def show_irrigation_info(self, planta_nome, day_number):
         self.destruir_frame()
         self.frame_dia_1 = customtkinter.CTkFrame(
             master=self.root, width=800, height=596)
         self.frame_dia_1.pack()
+        self.frame_cor_fundo = customtkinter.CTkFrame(
+            master=self.frame_dia_1, width=750, height=350, border_width=5)
+        self.frame_cor_fundo.place(x=25, y=100)
 
-        # Editando o frame --------------------------------------------
+        # Editando o frame
         label_dia_1 = customtkinter.CTkLabel(
-            master=self.frame_dia_1, text='DIA 1', font=('Josefin Sans bold', 30), text_color=laranja)
+            master=self.frame_dia_1, text='Relatório', font=('Josefin Sans bold', 30), text_color=laranja)
         label_dia_1.place(x=25, y=3)
 
-        # Editando o frame --------------------------------------------
         con = lite.connect('water.db')
         cursor = con.cursor()
-        cursor.execute("SELECT Tamanho, id FROM Plantacoes WHERE User=? AND Planta_Nome=?",
+        cursor.execute("SELECT Tamanho, id FROM Plantacoes WHERE User=? AND Cultura=?",
                        (usuario_logado, planta_nome))
         resultado = cursor.fetchone()
         con.close()
 
-        if resultado is not None:  # Verifica se a consulta retornou resultados
+        if resultado is not None:
             tamanho_area_planta = resultado[0]
-            id_planta = resultado[1]
+            self.id_planta = resultado[1]
+
+            # Chamar a função quantidade_de_chuva para obter as quantidades de chuva diária e absorvida
+            quantidades_chuva = asyncio.run(
+                self.AguaChuva(self.id_planta, planta_nome))
+            quantidade_chuva_dia = quantidades_chuva[day_number - 1]
 
             # Chamar a função AguaChuva com o ID e tamanho da área da planta
-            agua_absorvida = self.AguaChuva(
-                id_planta, planta_nome, usuario_logado)
+            agua_economizada = quantidade_chuva_dia
             quantidade_agua_necessaria = PlantasInfos[planta_nome] * \
                 tamanho_area_planta
-            quantidade_agua_gastadada = quantidade_agua_necessaria - agua_absorvida
-            # fazendo o grafico de barra ---------------------------------------------------
-            fig, ax = plt.subplots(figsize=(20, 20))
-            ax.barh = plt.barh(['Água\nnecessária','Água\neconomizada' ,'Água\ngasta'], [quantidade_agua_necessaria, agua_absorvida ,quantidade_agua_gastadada], color=[
-                                 azul_claro, laranja, vermelho])
-            
-            ax.set_ylabel('Litros')
-            ax.set_title('')
-            plt.tight_layout()
-            ax.tick_params(axis='y', colors='white', labelsize=35)  
+            quantidade_agua_gastada = quantidade_agua_necessaria - agua_economizada
+
+            # Calcular as porcentagens e criar as labels
+            fig, ax = plt.subplots(figsize=(15, 15))
+            labels = ['Água economizada', 'Água gasta']
+            ax.pie([agua_economizada, quantidade_agua_gastada], autopct='%1.1f%%',
+                   textprops={'fontsize': 30, 'color': 'white'}, colors=[azul_claro, laranja])
+            plt.legend(labels, fontsize="25", loc="upper right")
+            ax.axis('equal')
             plt.savefig('grafico_2.png', transparent=True)
             plt.close()
-            # Criar a imagem--------------------------------------------------------------------------------------------------------------------------
+
+            # Criar a imagem
             imagem_grafico = customtkinter.CTkImage(light_image=Image.open(
-                'grafico_2.png'), dark_image=Image.open('grafico_2.png'), size=(400, 400))  # Criar a imagem
-            # Posicionar a imagem
+                'grafico_2.png'), dark_image=Image.open('grafico_2.png'), size=(330, 330))
             label_imagem_grafico = customtkinter.CTkLabel(
-                master=self.frame_dia_1, image=imagem_grafico, text='')  # Posicionar a imagem
-            label_imagem_grafico.place(x=370, y=20)
+                master=self.frame_cor_fundo, image=imagem_grafico, text='')
+            label_imagem_grafico.place(x=10, y=10)
+
+            # criando os dados
+            l_agua_economizada = customtkinter.CTkLabel(master=self.frame_cor_fundo, text='Água economizada:', font=(
+                'Josefin Sans bold', 14), text_color=branco)
+            l_agua_economizada.place(x=400, y=120)
+            l_agua_economizada_2 = customtkinter.CTkLabel(master=self.frame_cor_fundo, text=f"{agua_economizada:.2f} L", font=(
+                'Josefin Sans bold', 14), text_color=azul_claro)
+            l_agua_economizada_2.place(x=550, y=120)
+            l_agua_gasta = customtkinter.CTkLabel(master=self.frame_cor_fundo, text='Água gasta:', font=(
+                'Josefin Sans bold', 14), text_color=branco)
+            l_agua_gasta.place(x=400, y=160)
+            l_agua_gasta_2 = customtkinter.CTkLabel(master=self.frame_cor_fundo, text=f"{quantidade_agua_gastada:.2f} L", font=(
+                'Josefin Sans bold', 14), text_color=azul_claro)
+            l_agua_gasta_2.place(x=500, y=160)
 
         else:
             label_texto = 'Planta não encontrada nas informações.'
             label_planta = customtkinter.CTkLabel(master=self.frame_dia_1, text=label_texto, font=(
                 'Josefin Sans bold', 30), text_color=laranja)
-    #adicionar imagem de perfil---------------------------------------------------
+            label_planta.place(x=25, y=3)
+
+        def botao_voltar_20():
+            self.destruir_frame()
+            self.acessar_planta(planta_nome)
+
+        btn_voltar_20 = customtkinter.CTkButton(master=self.frame_dia_1, text='VOLTAR', width=100, font=(
+            'Josefin Sans bold', 14), fg_color=amarelo, command=botao_voltar_20)
+        btn_voltar_20.place(x=25, y=500)
+
     def adicionar_imagem(self):
         filename = fd.askopenfilename(
             filetypes=[("Imagens", "*.png;*.jpg;*.jpeg")])
@@ -839,7 +975,8 @@ class WaterFriendlyApp:
             nova_imagem = customtkinter.CTkImage(
                 light_image=Image.open(temp_filename), dark_image=Image.open(temp_filename), size=(130, 130))
             self.label_imagem_1.configure(image=nova_imagem)
-    #tela de perfil---------------------------------------------------
+    # tela de perfil---------------------------------------------------
+
     def tela_perfil(self):
         # Destruindo o frame anterior
         self.destruir_frame()
@@ -950,6 +1087,7 @@ class WaterFriendlyApp:
             'Josefin Sans bold', 14), fg_color=vermelho, command=self.remover_conta)  # Criando o botão
         b_remover_conta.place(x=175, y=500)
     # criando a função de remover conta---------------------------------------------------
+
     def remover_conta(self):
         # Exibir um diálogo de confirmação--------------------------------------------
         resposta = messagebox.askyesno(
@@ -1008,6 +1146,7 @@ class WaterFriendlyApp:
         botaovoltar_2 = customtkinter.CTkButton(master=self.frame_alterar_sobrenome, text='VOLTAR', width=100, font=(
             'Josefin Sans bold', 14), fg_color=amarelo, command=self.tela_perfil)
         botaovoltar_2.place(x=250, y=450)
+
     def alterar_email(self):
         self.destruir_frame()
         # Criando a nova tela--------------------------------------------
@@ -1045,6 +1184,7 @@ class WaterFriendlyApp:
         botaovoltar_3 = customtkinter.CTkButton(master=self.frame_alterar_email, text='VOLTAR', width=100, font=(
             'Josefin Sans bold', 14), fg_color=amarelo, command=self.tela_perfil)
         botaovoltar_3.place(x=250, y=450)
+
     def alterar_cidade(self):
         self.destruir_frame()
         # Criando a nova tela--------------------------------------------
@@ -1086,6 +1226,7 @@ class WaterFriendlyApp:
         botaovoltar_4 = customtkinter.CTkButton(master=self.frame_alterar_cidade, text='VOLTAR', width=100, font=(
             'Josefin Sans bold', 14), fg_color=amarelo, command=self.tela_perfil)
         botaovoltar_4.place(x=250, y=450)
+
     def alterar_senha(self):
         self.destruir_frame()
         # Criando a nova tela--------------------------------------------
@@ -1123,6 +1264,7 @@ class WaterFriendlyApp:
         botaovoltar_5 = customtkinter.CTkButton(master=self.frame_alterar_senha, text='VOLTAR', width=100, font=(
             'Josefin Sans bold', 14), fg_color=amarelo, command=self.tela_perfil)
         botaovoltar_5.place(x=250, y=450)
+
 
 # chamamando o app ---------------------------------------------------
 if __name__ == "__main__":
