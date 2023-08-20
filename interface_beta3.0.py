@@ -833,10 +833,10 @@ class WaterFriendlyApp:
             con = lite.connect('water.db')
             cursor = con.cursor()
             cursor.execute("PRAGMA foreign_keys = ON")
-            cursor.execute("UPDATE Plantacoes SET tamanho = ? WHERE User = ? AND Cultura = ?", (
+            cursor.execute("UPDATE Plantacoes SET tamanho = ? WHERE User = ? AND Planta_Nome = ?", (
                 novo_tamanho, usuario_logado, planta_nome))  # Atualizar o tamanho da planta
             con.commit()  # Salvar as alterações
-            id = cursor.execute("SELECT id FROM Plantacoes WHERE User = ? AND Cultura = ?", (
+            id = cursor.execute("SELECT id FROM Plantacoes WHERE User = ? AND Planta_Nome = ?", (
                 usuario_logado, planta_nome)).fetchone()[0]
             self.Renovar_Sensores(int(Quantidade), id)
             con.close()  # Fechar a conexão com o banco de dados
@@ -850,10 +850,13 @@ class WaterFriendlyApp:
             command=lambda: salvar_tamanho(planta_nome))
         botao_salvar.place(x=425, y=450)
         # Botão de voltar--------------------------------------------
-
+        con = lite.connect('water.db')
+        cursor = con.cursor()
+        Cultura = cursor.execute("SELECT Cultura FROM Plantacoes WHERE User=? AND Planta_Nome=?", (usuario_logado, planta_nome)).fetchone()[0]
+        con.close()
         def botao_voltar_4():  # Função para voltar para a tela de gerenciamento
             self.frame_alterar_tamanho.pack_forget()  # esquecer o frame de alterar tamanho
-            self.acessar_planta(planta_nome)  # mostrar o frame de update
+            self.acessar_planta(Cultura, planta_nome)  # mostrar o frame de update
         # Botão de voltar--------------------------------------------
         botaovoltar = customtkinter.CTkButton(master=self.frame_alterar_tamanho, text='VOLTAR', width=150, font=(
             'Josefin Sans bold', 14), fg_color=amarelo, command=botao_voltar_4)
