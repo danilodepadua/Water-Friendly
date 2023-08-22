@@ -689,7 +689,7 @@ class WaterFriendlyApp:
         resposta_1 = messagebox.askyesno('Remover', 'Deseja remover a planta?')
         if resposta_1 == True:
             cursor.execute(
-                "DELETE FROM Plantacoes WHERE Cultura = ?", (planta_nome,))  # Remover a planta do banco de dados
+                "DELETE FROM Plantacoes WHERE Planta_Nome =? AND User = ?", (planta_nome, usuario_logado))  # Remover a planta do banco de dados
             con.commit()  # Salvar as alterações no banco de dados com o comando commit
             con.close()  # Fechar a conexão com o banco de dados
             # adicionando a mensegem de sucesso
