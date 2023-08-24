@@ -41,21 +41,23 @@ PlantasInfos = {
     'CAFÉ': 50000,
 }
 # atribuindo imagens para a previsao do tempo-------------------------
+script_dir = os.path.dirname(os.path.abspath(__file__))
 icone_map = {
-    "céu limpo": "ICONE PREVISAO\\sol.png",
-    "nuvens dispersas": "ICONE PREVISAO\\nuvem_sol.png",
-    "nuvens": "ICONE PREVISAO\\nuvem.png",
-    "chuva": "ICONE PREVISAO\\chuva_leve.png",
-    "tempestade": "ICONE PREVISAO\\chuva_Forte.png",
-    "chuva com trovões": "ICONE PREVISAO\\chuva_com_trovoes.png",
-    "poucas nuvens": "ICONE PREVISAO\\poucas_nuvens.png",
-    "chuva leve": "ICONE PREVISAO\\chuva_leve.png",
-    "nuvens quebradas": "ICONE PREVISAO\\chuva_Forte.png",
-    'nublado': 'ICONE PREVISAO\\poucas_nuvens.png',
-    'parcialmente nublado': 'ICONE PREVISAO\\nuvem_sol.png',
-    'algumas nuvens': 'ICONE PREVISAO\\poucas_nuvens.png',
-    'chuva moderada': 'ICONE PREVISAO\\chuva_Forte.png'
+    "céu limpo": os.path.join(script_dir, "ICONE PREVISAO", "sol.png"),
+    "nuvens dispersas": os.path.join(script_dir, "ICONE PREVISAO", "nuvem_sol.png"),
+    "nuvens": os.path.join(script_dir, "ICONE PREVISAO", "nuvem.png"),
+    "chuva": os.path.join(script_dir, "ICONE PREVISAO", "chuva_leve.png"),
+    "tempestade": os.path.join(script_dir, "ICONE PREVISAO", "chuva_Forte.png"),
+    "chuva com trovões": os.path.join(script_dir, "ICONE PREVISAO", "chuva_com_trovoes.png"),
+    "poucas nuvens": os.path.join(script_dir, "ICONE PREVISAO", "poucas_nuvens.png"),
+    "chuva leve": os.path.join(script_dir, "ICONE PREVISAO", "chuva_leve.png"),
+    "nuvens quebradas": os.path.join(script_dir, "ICONE PREVISAO", "chuva_Forte.png"),
+    'nublado': os.path.join(script_dir, "ICONE PREVISAO", "poucas_nuvens.png"),
+    'parcialmente nublado': os.path.join(script_dir, "ICONE PREVISAO", "nuvem_sol.png"),
+    'algumas nuvens': os.path.join(script_dir, "ICONE PREVISAO", "poucas_nuvens.png"),
+    'chuva moderada': os.path.join(script_dir, "ICONE PREVISAO", "chuva_Forte.png")
 }
+
 # criando o banco caso não exista------------------------------------------------
 con = lite.connect('water.db')  # Nome do banco
 with con:
@@ -65,23 +67,27 @@ with con:
     cursor.execute("CREATE TABLE IF NOT EXISTS Sensores (ident INTEGER PRIMARY KEY, id_plantacao INTEGER, absorsao INTEGER, FOREIGN KEY(id_plantacao) REFERENCES Plantacoes(id) ON DELETE CASCADE)")
 
 # -----------------------------------------------------------------------------------
-imagem_botoes = {
-    'ALFACE': 'ICONES CULTURAS\\ALFACE.png',
-    'BATATA': 'ICONES CULTURAS\\BATATA.png',
-    'BERINGELA': 'ICONES CULTURAS\\BERINGELA.png',
-    'BETERRABA': 'ICONES CULTURAS\\BETERRABA.png',
-    'BROCOLIS': 'ICONES CULTURAS\\BROCOLIS.png',
-    'CENOURA': 'ICONES CULTURAS\\CENOURA.png',
-    'CEBOLA': 'ICONES CULTURAS\\CEBOLA.png',
-    'COUVE': 'ICONES CULTURAS\\COUVE.png',
-    'COUVEFLOR': 'ICONES CULTURAS\\COUVEFLOR.png',
-    'ESPINAFRE': 'ICONES CULTURAS\\ESPINAFRE.png',
-    'FEIJÃO': 'ICONES CULTURAS\\FEIJÃO.png',
-    'TOMATE': 'ICONES CULTURAS\\TOMATE.png',
-    'PIMENTÃO': 'ICONES CULTURAS\\PIMENTAO.png',
-    'CAFÉ': 'ICONES CULTURAS\\CAFÉ.png'
-}
+script_dir = os.path.dirname(os.path.abspath(__file__))
+logo_path = os.path.join(script_dir, 'logo.png')
+usuario_path = os.path.join(script_dir, 'usuario.png')
+logo_ico_path = os.path.join(script_dir, 'logo.ico')
 
+imagem_botoes = {
+    'ALFACE': os.path.join(script_dir, 'ICONES CULTURAS', 'ALFACE.png'),
+    'BATATA': os.path.join(script_dir, 'ICONES CULTURAS', 'BATATA.png'),
+    'BERINGELA': os.path.join(script_dir, 'ICONES CULTURAS', 'BERINGELA.png'),
+    'BETERRABA': os.path.join(script_dir, 'ICONES CULTURAS', 'BETERRABA.png'),
+    'BROCOLIS': os.path.join(script_dir, 'ICONES CULTURAS', 'BROCOLIS.png'),
+    'CENOURA': os.path.join(script_dir, 'ICONES CULTURAS', 'CENOURA.png'),
+    'CEBOLA': os.path.join(script_dir, 'ICONES CULTURAS', 'CEBOLA.png'),
+    'COUVE': os.path.join(script_dir, 'ICONES CULTURAS', 'COUVE.png'),
+    'COUVEFLOR': os.path.join(script_dir, 'ICONES CULTURAS', 'COUVEFLOR.png'),
+    'ESPINAFRE': os.path.join(script_dir, 'ICONES CULTURAS', 'ESPINAFRE.png'),
+    'FEIJÃO': os.path.join(script_dir, 'ICONES CULTURAS', 'FEIJÃO.png'),
+    'TOMATE': os.path.join(script_dir, 'ICONES CULTURAS', 'TOMATE.png'),
+    'PIMENTÃO': os.path.join(script_dir, 'ICONES CULTURAS', 'PIMENTAO.png'),
+    'CAFÉ': os.path.join(script_dir, 'ICONES CULTURAS', 'CAFÉ.png')
+}
 
 class WaterFriendlyApp:
     # construtor da classe------------------------------------------------------
@@ -105,7 +111,7 @@ class WaterFriendlyApp:
         self.frame_left.pack(side=LEFT)
         # Editando o frame-------------------------------------------------------
         wf = customtkinter.CTkImage(light_image=Image.open(
-            'logo.png'), dark_image=Image.open('logo.png'), size=(150, 150))
+            logo_path), dark_image=Image.open(logo_path), size=(150, 150))
         label_logo = customtkinter.CTkLabel(
             master=self.frame_right, image=wf, text='')
         label_logo.place(x=120, y=20)
@@ -262,7 +268,7 @@ class WaterFriendlyApp:
         cidade = self.entry_cidade.get()
         pais = self.entry_pais.get()
         senha_1 = self.entry_senha_1.get()
-        imagem_perfil = 'usuario.png'
+        imagem_perfil = usuario_path
         con = lite.connect('water.db')  # Abrir a conexão com o banco de dados
         cursor = con.cursor()  # Criar um cursor para executar as consultas
         try:
@@ -997,10 +1003,10 @@ class WaterFriendlyApp:
         cursor.execute(
             "SELECT imagem_perfil FROM Usuarios WHERE apelido = ?", (usuario_logado,))
         resultado = cursor.fetchone()
+        imagem_perfil_path = os.path.join(script_dir, resultado[0])
         con.close()
         # colocar a imagem de perfil---------------------------------------------------------
-        imagem_perfil = customtkinter.CTkImage(light_image=Image.open(
-            resultado[0]), dark_image=Image.open(resultado[0]), size=(130, 130))
+        imagem_perfil = customtkinter.CTkImage(light_image=Image.open(imagem_perfil_path), dark_image=Image.open(imagem_perfil_path), size=(130, 130))
         self.label_imagem_1 = customtkinter.CTkLabel(
             master=frame_cor_de_fundo, image=imagem_perfil, text='')
         self.label_imagem_1.place(x=40, y=60)
@@ -1226,6 +1232,6 @@ class WaterFriendlyApp:
 # chamamando o app ---------------------------------------------------
 if __name__ == "__main__":
     root = CTk()
-    root.iconbitmap('logo.ico')
+    root.iconbitmap(logo_ico_path)
     app = WaterFriendlyApp(root)
     root.mainloop()
