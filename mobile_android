@@ -1,0 +1,501 @@
+// classe da plantaçao
+package com.example.testealura.model;
+
+import androidx.annotation.NonNull;
+
+import java.io.Serializable;
+
+public class Plantacao implements Serializable {
+
+    // id da plantação
+    private int id = 0;
+
+    // nome da plantação
+    private String nome;
+
+    // area da plantação
+    private String area;
+
+    // quantidade de sensores da plantação
+    private String qtdSensores;
+
+    // construtor da classe
+    public Plantacao(String nome, String area, String qtdSensores) {
+        this.nome = nome;
+        this.area = area;
+        this.qtdSensores = qtdSensores;
+    }
+
+    // construtor vazio
+    public Plantacao() {
+
+    }
+
+    // retorna o nome da plantação
+    public String getNome() {
+        return nome;
+    }
+
+    // retorna a área da plantação
+    public String getArea() {
+        return area;
+    }
+
+    // retorna a quantidade de sensores da plantação
+    public String getQtdSensores() {
+        return qtdSensores;
+    }
+
+    // representação em string da plantação
+    @NonNull
+    @Override
+    public String toString() {
+        return nome;
+    }
+
+    // define o ID da plantação
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    // retorna o ID da plantação
+    public int getId() {
+        return id;
+    }
+
+    // define a quantidade de sensores da plantação
+    public void setQtdSensores(String qtdSensores) {
+        this.qtdSensores = qtdSensores;
+    }
+
+    // define a área da plantação
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    // define o nome da plantação
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    // verifica se a plantação possui um ID válido
+    public boolean temIdValido() {
+        return id > 0;
+    }
+}
+
+
+
+// classe do DAO da plantacao
+
+  package com.example.testealura.ui.activity;
+
+import androidx.annotation.Nullable;
+
+import com.example.testealura.model.Plantacao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class PlantacaoDAO {
+
+    // contador para IDs únicos
+    private static int contadorDeIds = 1;
+
+    // lista que armazena as plantações
+    private final static List<Plantacao> plantacoes = new ArrayList<>();
+
+    // retorna uma cópia da lista de plantações
+    public List<Plantacao> todas() {
+        return new ArrayList<>(plantacoes);
+    }
+
+    // salva uma plantação na lista
+    public void salva(Plantacao plantacao) {
+        plantacao.setId(contadorDeIds);
+        plantacoes.add(plantacao);
+        incrementaId();
+    }
+
+    // incrementa o contador de IDs
+    private static void incrementaId() {
+        contadorDeIds++;
+    }
+
+    // edita uma plantação na lista
+    public void edita(Plantacao plantacao) {
+        Plantacao plantacaoEncontrada = buscaPlantacaoPorId(plantacao);
+        if (plantacaoEncontrada != null) {
+            int posicaoDaPlantacao = plantacoes.indexOf(plantacaoEncontrada);
+            plantacoes.set(posicaoDaPlantacao, plantacao);
+        }
+    }
+
+    // busca uma plantação por ID
+    @Nullable
+    private static Plantacao buscaPlantacaoPorId(Plantacao plantacao) {
+        Plantacao plantacaoEncontrada = null;
+        for (Plantacao a : plantacoes) {
+            if (a.getId() == plantacao.getId()) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+    // remove uma plantação da lista
+    public void remove(Plantacao plantacao) {
+        Plantacao plantacaoDevolvida = buscaPlantacaoPorId(plantacao);
+        if(plantacaoDevolvida != null){
+            plantacoes.remove(plantacaoDevolvida);
+        }
+    }
+}
+
+
+// tela de adicionar/editar plantacoes
+    package com.example.testealura.ui.activity;
+
+import static com.example.testealura.ui.activity.ConstantesActivities.CHAVE_PLANTACAO;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.testealura.R;
+import com.example.testealura.model.Plantacao;
+
+public class FormularioCulturasActivity extends AppCompatActivity {
+
+    // títulos para a barra de aplicativo
+    public static final String TITULO_APPBAR_NOVA_PLANTACAO = "Nova plantação";
+    private static final String TITULO_APPBAR_EDITA_PLANTACAO = "Editar plantação";
+
+    // campos de entrada para dados
+    private EditText nomeCampo;
+    private EditText areaCampo;
+    private EditText qtdSensoresCampo;
+
+    // instancia do DAO para interação com os dados de plantação
+    private final PlantacaoDAO dao = new PlantacaoDAO();
+    private Plantacao plantacao;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // pegando as informações salvas nos campos ao apertar o botão
+        setContentView(R.layout.activity_formulario_culturas);
+
+        setTitle(TITULO_APPBAR_NOVA_PLANTACAO);
+
+        iniciaCampos();
+
+        configuraBotaoSalvar();
+
+        carregaPlantacao();
+    }
+
+    private void carregaPlantacao() {
+        Intent dados = getIntent();
+        if(dados.hasExtra(CHAVE_PLANTACAO)) {
+            setTitle(TITULO_APPBAR_EDITA_PLANTACAO);
+            plantacao = (Plantacao) dados.getSerializableExtra(CHAVE_PLANTACAO);
+            preencheCampos();
+        } else {
+            setTitle(TITULO_APPBAR_NOVA_PLANTACAO);
+            plantacao = new Plantacao();
+        }
+    }
+
+    private void preencheCampos() {
+        nomeCampo.setText(plantacao.getNome());
+        areaCampo.setText(plantacao.getArea());
+        qtdSensoresCampo.setText(plantacao.getQtdSensores());
+    }
+
+    private void configuraBotaoSalvar() {
+        Button botaoSalvar = findViewById(R.id.activity_formulario_culturas_botao_salvar);
+        botaoSalvar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finalizaFormulario();
+            }
+        });
+    }
+
+    private void finalizaFormulario() {
+        preenchePlantacao();
+        if(plantacao.temIdValido()){
+            dao.edita(plantacao);
+        } else {
+            dao.salva(plantacao);
+        }
+        finish();
+    }
+
+    private void iniciaCampos() {
+        nomeCampo = findViewById(R.id.activity_formulario_cultura_nome);
+        areaCampo = findViewById(R.id.activity_formulario_cultura_area);
+        qtdSensoresCampo = findViewById(R.id.activity_formulario_cultura_qtd_sensores);
+    }
+
+    private void preenchePlantacao() {
+        String nome = nomeCampo.getText().toString();
+        String area = areaCampo.getText().toString();
+        String qtdSensores = qtdSensoresCampo.getText().toString();
+
+        plantacao.setNome(nome);
+        plantacao.setArea(area);
+        plantacao.setQtdSensores(qtdSensores);
+    }
+}
+
+// tela inicial/lista de plantacoes
+      package com.example.testealura.ui.activity;
+
+import static com.example.testealura.ui.activity.ConstantesActivities.CHAVE_PLANTACAO;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.testealura.R;
+import com.example.testealura.model.Plantacao;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.List;
+
+public class ListaCulturasActivity extends AppCompatActivity {
+
+    // título para a barra de aplicativo
+    public static final String TITULO_APPBAR = "Cultivos";
+
+    // instância do DAO para interação com os dados de plantação
+    private final PlantacaoDAO dao = new PlantacaoDAO();
+    private ListView listaDeCulturas;
+    private ArrayAdapter<Plantacao> adapter;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_lista_culturas);
+
+        setTitle(TITULO_APPBAR);
+
+        configuraFABNovaPlantacao();
+        configuraLista();
+    }
+
+    // configura o botão de adicionar nova plantação
+    private void configuraFABNovaPlantacao() {
+        // método para inserir uma nova plantação ao clicar no botão "+"
+        FloatingActionButton botaoNovaPlantacao = findViewById(R.id.activity_lista_culturas_fab_nova_cultura);
+        botaoNovaPlantacao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                abreFormularioModoInserirPlantacao();
+            }
+        });
+    }
+
+    // abre o formulário no modo de inserção de plantação
+    private void abreFormularioModoInserirPlantacao() {
+        startActivity(new Intent(this, FormularioCulturasActivity.class));
+    }
+
+    // voltando para a tela inicial depois de salvar informações
+    @Override
+    protected void onResume() {
+        super.onResume();
+        atualizaPlantacoes();
+    }
+
+    // atualiza a lista de plantações
+    private void atualizaPlantacoes() {
+        adapter.clear();
+        adapter.addAll(dao.todas());
+    }
+
+    // configura a lista de culturas
+    private void configuraLista() {
+        listaDeCulturas = findViewById(R.id.activity_lista_culturas_listview);
+
+        configuraAdapter(listaDeCulturas);
+        configuraListenerDeClickPorItem(listaDeCulturas);
+        configuraListenerDeClickLongoPorItem();
+    }
+
+    // configura o listener de clique longo em um item da lista
+    private void configuraListenerDeClickLongoPorItem() {
+        listaDeCulturas.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int posicao, long id) {
+                Plantacao plantacaoEscolhida = (Plantacao) adapterView.getItemAtPosition(posicao);
+                remove(plantacaoEscolhida);
+                return true;
+            }
+        });
+    }
+
+    // remove a plantação da lista e do banco de dados
+    private void remove(Plantacao plantacao) {
+        dao.remove(plantacao);
+        adapter.remove(plantacao);
+    }
+
+    // configura o listener de clique em um item da lista
+    private void configuraListenerDeClickPorItem(ListView listaDeCulturas) {
+        listaDeCulturas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int posicao, long id) {
+                Plantacao plantacaoEscolhida = (Plantacao) adapterView.getItemAtPosition(posicao);
+                abreFormularioModoEditaPlantacao(plantacaoEscolhida);
+            }
+        });
+    }
+
+    // abre o formulário no modo de edição de plantação
+    private void abreFormularioModoEditaPlantacao(Plantacao plantacao) {
+        Intent vaiParaFormularioActivity = new Intent(ListaCulturasActivity.this, FormularioCulturasActivity.class);
+        vaiParaFormularioActivity.putExtra(CHAVE_PLANTACAO, plantacao);
+        startActivity(vaiParaFormularioActivity);
+    }
+
+    // configura o adapter para a lista de culturas
+    private void configuraAdapter(ListView listaDeCulturas) {
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
+        this.listaDeCulturas.setAdapter(adapter);
+    }
+}
+
+
+        // AndroidManifest.xml - informações essenciais sobre o aplicativo para as ferramentas de compilação do android
+
+        <?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.TesteAlura"
+        tools:targetApi="31">
+        <activity
+            android:name=".ui.activity.FormularioCulturasActivity"
+            android:exported="true">
+
+        </activity>
+        <activity
+            android:name=".ui.activity.ListaCulturasActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+
+
+        //lista_culturas.xml
+        <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ListView
+        android:id="@+id/activity_lista_culturas_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+
+
+    </ListView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/activity_lista_culturas_fab_nova_cultura"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:clickable="true"
+        android:contentDescription="teste"
+        android:src="@drawable/ic_action_name"
+        android:focusable="true"
+        app:srcCompat="@android:drawable/ic_menu_add"
+        />
+
+</RelativeLayout>
+
+
+
+        // formulario_culturas.xml 
+
+        <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <EditText
+        android:id="@+id/activity_formulario_cultura_nome"
+        android:layout_width="397dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:inputType="textCapWords"
+        android:hint="Cultura" />
+
+    <EditText
+        android:id="@+id/activity_formulario_cultura_area"
+        android:layout_width="397dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:inputType="number"
+        android:hint="Área em hectares" />
+
+    <EditText
+        android:id="@+id/activity_formulario_cultura_qtd_sensores"
+        android:layout_width="395dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:inputType="number"
+        android:hint="Qtd. de sensores" />
+
+    <Button
+        android:id="@+id/activity_formulario_culturas_botao_salvar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Salvar"
+        android:layout_marginEnd="8dp" />
+
+</LinearLayout>
